@@ -45,7 +45,7 @@ Traefik is the single entry point for all client requests. It reads healthy inst
 ### Service Discovery (Consul)
 Each service instance registers itself in Consul with a shared service name (e.g. both `auth1` and `auth2` register as `auth`). Consul runs health checks every 30 seconds. Only passing instances are served to Traefik.
 
- ![rabbit](https://enchere-dz.com/aos/consul.png)
+ ![rabbit](https://enchere-dz.com/aos/consul1.png)
 
 ### Messaging (RabbitMQ)
 Services communicate asynchronously via RabbitMQ:
