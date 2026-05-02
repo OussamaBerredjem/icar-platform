@@ -40,14 +40,20 @@ Each service runs **2 instances** for redundancy and load balancing.
 ### Gateway (Traefik)
 Traefik is the single entry point for all client requests. It reads healthy instances from Consul and automatically load balances traffic between them. If an instance goes down, Consul marks it unhealthy and Traefik stops routing to it within 30 seconds.
 
+![traefik](https://enchere-dz.com/aos/traefik.png)
+
 ### Service Discovery (Consul)
 Each service instance registers itself in Consul with a shared service name (e.g. both `auth1` and `auth2` register as `auth`). Consul runs health checks every 30 seconds. Only passing instances are served to Traefik.
+
+![diagram](https://enchere-dz.com/aos/consul.png)
 
 ### Messaging (RabbitMQ)
 Services communicate asynchronously via RabbitMQ:
 - **Auth** publishes user events (e.g. user created, user updated)
 - **Catalog consumer** listens and syncs user data
 - **Notification consumer** listens and sends notifications
+
+  ![diagram](https://enchere-dz.com/aos/rabbitmq.png)
 
 This decouples services — no direct HTTP calls between them.
 
