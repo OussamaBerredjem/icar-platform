@@ -19,24 +19,7 @@ iCar Algeria is a microservices-based car marketplace backend built with Django 
 
 ## Architecture
 
-```
-Client
-  │
-  ▼
-Traefik (port 80)  ◄──► Consul (health checks)
-  │
-  ├── /auth/*           ──► auth1 (8001) ┐  load balanced
-  │                         auth2 (8002) ┘
-  │
-  ├── /catalog/*        ──► car1  (8003) ┐  load balanced
-  │                         car2  (8004) ┘
-  │
-  └── /notifications/*  ──► notification1 (8005) ┐  load balanced
-                            notification2 (8006) ┘
-
-Auth ──publish──► RabbitMQ ──► catalog-consumer
-                           └──► notification-consumer
-```
+![diagram](https://enchere-dz.com/diagram.png)
 
 ---
 
