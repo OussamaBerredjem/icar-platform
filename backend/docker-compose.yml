@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+
+  # ================= GATEWAY =================
+  consul:
+    image: consul:1.15
+    command: agent -dev -client=0.0.0.0
+    ports:
+      - "8500:8500"
+    networks:
+      - gateway
+
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.consulcatalog=true"
+      - "--providers.consulcatalog.endpoint.address=consul:8500"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    depends_on:
+      - consul
+    networks:
+      - gateway
+
+  # ================= INFRA =================
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - gateway
+
+  # ================= SERVICES =================
+
+  auth1:
+    build: ./services/auth
+    ports:
+      - "8001:7860"
+    networks:
+      - gateway
+
+  auth2:
+    build: ./services/auth
+    ports:
+      - "8002:7860"
+    networks:
+      - gateway
+
+  car1:
+    build: ./services/car
+    ports:
+      - "8003:7860"
+    networks:
+      - gateway
+
+  car2:
+    build: ./services/car
+    ports:
+      - "8004:7860"
+    networks:
+      - gateway
+
+  notification1:
+    build: ./services/notification
+    ports:
+      - "8005:7860"
+    networks:
+      - gateway
+
+  notification2:
+    build: ./services/notification
+    ports:
+      - "8006:7860"
+    networks:
+      - gateway
+
+networks:
+  gateway:
+    driver: bridge

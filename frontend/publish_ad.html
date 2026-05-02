@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iCar — Publier une annonce</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: rgba(255,255,255,0.07);
+    --purple: #7B5CF0;
+    --purple-light: #9B7BFF;
+    --purple-glow: rgba(123,92,240,0.2);
+    --gold: #F5C842;
+    --text: #F0EFF8;
+    --text-secondary: #A0A0B0;
+    --muted: #7A798E;
+    --error: #FF5C5C;
+    --success: #4CAF50;
+    --header-bg: rgba(10,10,15,0.9);
+    --shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  body.light-mode {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f0f5;
+    --border: rgba(0,0,0,0.08);
+    --purple: #7B5CF0;
+    --purple-light: #6B4CE0;
+    --text: #1a1a2e;
+    --text-secondary: #555;
+    --muted: #6B6B7B;
+    --header-bg: rgba(255,255,255,0.95);
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 48px; background:var(--header-bg); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+  .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .logo-icon { width:36px; height:36px; background:var(--purple); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; color:#fff; font-size:18px; }
+  .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:var(--text); }
+  .logo-text span { color:var(--purple-light); }
+  .nav-right { display:flex; gap:10px; align-items:center; }
+  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); border-radius: 30px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
+  .theme-toggle:hover { border-color: var(--purple); }
+
+  .btn { padding:9px 20px; border-radius:9px; font-size:14px; font-weight:500; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; transition:all .2s; }
+  .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .btn-ghost:hover { color:var(--text); border-color:var(--purple); }
+  .btn-primary { background:var(--purple); color:#fff; }
+  .btn-primary:hover { background:var(--purple-light); transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  /* PAGE LAYOUT */
+  .page-wrap { max-width:900px; margin:0 auto; padding:48px 24px; }
+
+  .page-header { margin-bottom:36px; }
+  .breadcrumb { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin-bottom:16px; }
+  .breadcrumb a { color:var(--muted); text-decoration:none; }
+  .breadcrumb a:hover { color:var(--purple-light); }
+  .breadcrumb i { font-size:10px; }
+  .page-title { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; margin-bottom:6px; }
+  .page-sub { color:var(--muted); font-size:14px; }
+
+  /* STEPS */
+  .steps { display:flex; align-items:center; gap:0; margin-bottom:40px; }
+  .step { display:flex; align-items:center; gap:10px; flex:1; }
+  .step-num { width:32px; height:32px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--muted); flex-shrink:0; transition:all .3s; }
+  .step.active .step-num { background:var(--purple); border-color:var(--purple); color:#fff; box-shadow:0 0 16px var(--purple-glow); }
+  .step.done .step-num { background:var(--success); border-color:var(--success); color:#fff; }
+  .step-label { font-size:13px; color:var(--muted); font-weight:500; }
+  .step.active .step-label { color:var(--text); }
+  .step-line { flex:1; height:1px; background:var(--border); margin:0 12px; }
+  .step.done + .step-line, .step.done ~ .step .step-line { background:var(--success); }
+
+  /* CARDS */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px; margin-bottom:24px; box-shadow:var(--shadow); }
+  .card-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:10px; color:var(--text); }
+  .card-title i { color:var(--purple-light); }
+  .card-sub { color:var(--muted); font-size:13px; margin-bottom:24px; }
+
+  /* FORM */
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .form-group { margin-bottom:0; }
+  .form-group.full { grid-column:1/-1; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500; }
+  label span.req { color:var(--purple-light); }
+  .form-input, .form-select, .form-textarea {
+    width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif;
+    outline:none; transition:all .2s; appearance:none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color:var(--purple); box-shadow:0 0 0 3px var(--purple-glow);
+  }
+  .form-input.error, .form-select.error { border-color:var(--error); }
+  .form-textarea { resize:vertical; min-height:110px; }
+  .form-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A798E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; cursor:pointer; }
+  .form-select option { background:var(--surface2); color:var(--text); }
+  .field-error { font-size:11px; color:var(--error); margin-top:5px; display:none; }
+  .field-error.show { display:block; }
+
+  /* PRICE INPUT */
+  .price-input-wrap { position:relative; }
+  .price-input-wrap .form-input { padding-right:50px; }
+  .price-suffix { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--muted); font-weight:600; pointer-events:none; }
+
+  /* IMAGE UPLOAD */
+  .upload-area {
+    border:2px dashed var(--border); border-radius:14px; padding:36px; text-align:center;
+    cursor:pointer; transition:all .2s; background:var(--surface2);
+  }
+  .upload-area:hover, .upload-area.drag-over { border-color:var(--purple); background:rgba(123,92,240,0.05); }
+  .upload-area i { font-size:36px; color:var(--muted); display:block; margin-bottom:12px; }
+  .upload-area p { color:var(--muted); font-size:14px; }
+  .upload-area p strong { color:var(--purple-light); }
+  .upload-area input[type=file] { display:none; }
+
+  .images-preview { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  .img-thumb { position:relative; aspect-ratio:4/3; border-radius:10px; overflow:hidden; border:2px solid var(--border); }
+  .img-thumb img { width:100%; height:100%; object-fit:cover; }
+  .img-thumb .img-remove { position:absolute; top:6px; right:6px; width:24px; height:24px; background:rgba(0,0,0,0.7); border:none; border-radius:50%; color:#fff; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+  .img-thumb .img-remove:hover { background:var(--error); }
+  .img-thumb.primary-thumb { border-color:var(--purple); }
+  .img-thumb .primary-badge { position:absolute; bottom:6px; left:6px; background:var(--purple); color:#fff; font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600; }
+  .img-set-primary { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:20px; color:#fff; font-size:10px; padding:2px 7px; cursor:pointer; display:none; }
+  .img-thumb:hover .img-set-primary { display:block; }
+
+  /* FORM ACTIONS */
+  .form-actions-bar { display:flex; justify-content:space-between; align-items:center; margin-top:32px; padding-top:24px; border-top:1px solid var(--border); }
+  .form-actions-bar .left { display:flex; gap:12px; }
+
+  /* ALERT */
+  .alert { padding:13px 16px; border-radius:10px; font-size:14px; display:none; margin-bottom:20px; }
+  .alert.show { display:flex; align-items:center; gap:10px; }
+  .alert.success { background:rgba(76,175,80,0.1); border:1px solid rgba(76,175,80,0.3); color:#81c784; }
+  .alert.error { background:rgba(255,92,92,0.1); border:1px solid rgba(255,92,92,0.3); color:#ff8080; }
+
+  /* LOADING */
+  .spin { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; right:24px; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:500; z-index:9999; animation:slideUp .3s ease; box-shadow:0 8px 30px rgba(0,0,0,0.3); display:flex; align-items:center; gap:8px; }
+  .toast.success { background:#1a3a1a; border:1px solid rgba(76,175,80,0.4); color:#81c784; }
+  .toast.error { background:#3a1a1a; border:1px solid rgba(255,92,92,0.4); color:#ff8080; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+  /* TIP BOX */
+  .tip-box { background:rgba(123,92,240,0.06); border:1px solid rgba(123,92,240,0.2); border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:12px; margin-bottom:20px; }
+  .tip-box i { color:var(--purple-light); font-size:15px; flex-shrink:0; margin-top:1px; }
+  .tip-box p { color:var(--text-secondary); font-size:13px; line-height:1.5; }
+
+  @media(max-width:768px) {
+    nav { padding:14px 20px; }
+    .page-wrap { padding:24px 16px; }
+    .form-grid { grid-template-columns:1fr; }
+    .form-group.full { grid-column:1; }
+    .images-preview { grid-template-columns:repeat(2,1fr); }
+    .steps { gap:0; }
+    .step-label { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">i</div>
+    <span class="logo-text">i<span>Car</span></span>
+  </a>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i><span>Clair/Sombre</span></button>
+    <button class="btn btn-ghost" onclick="window.location.href='profile.html'"><i class="fas fa-arrow-left"></i> Mon profil</button>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="index.html">Accueil</a>
+      <i class="fas fa-chevron-right"></i>
+      <a href="profile.html">Mon profil</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Publier une annonce</span>
+    </div>
+    <div class="page-title">🚗 Publier une annonce</div>
+    <div class="page-sub">Décrivez votre véhicule en détail pour attirer les acheteurs sérieux</div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Informations</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Photos</div></div>
+    <div class="step-line"></div>
+    <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Contact</div></div>
+  </div>
+
+  <div class="alert" id="mainAlert"></div>
+
+  <!-- STEP 1: Informations véhicule -->
+  <div id="formStep1">
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-car"></i> Informations du véhicule</div>
+      <div class="card-sub">Renseignez les caractéristiques principales de votre véhicule</div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Marque <span class="req">*</span></label>
+          <input type="text" class="form-input" id="brand" placeholder="Ex: Toyota, BMW, Renault…">
+          <div class="field-error" id="err-brand">La marque est requise</div>
+        </div>
+
+        <div class="form-group">
+          <label>Modèle <span class="req">*</span></label>
+          <input type="text" class="form-input" id="vehicleName" placeholder="Ex: Camry, X5, Clio…">
+          <div class="field-error" id="err-vehicleName">Le modèle est requis</div>
+        </div>
+
+        <div class="form-group">
+          <label>Année <span class="req">*</span></label>
+          <input type="number" class="form-input" id="year" placeholder="Ex: 2021" min="1970" max="2026">
+          <div class="field-error" id="err-year">L'année est requise</div>
+        </div>
+
+   <div class="form-group">
+  <label>Sous-catégorie <span class="req">*</span></label>
+  <select class="form-select" id="subcategory">
+    <option value="">Chargement…</option>
+  </select>
+  <div class="field-error" id="err-subcategory">La sous-catégorie est requise</div>
+</div>
+
+     <select class="form-select" id="fuel">
+  <option value="">Sélectionner…</option>
+  <option value="gasoil">Gasoil</option>
+  <option value="diesel">Diesel</option>
+  <option value="hybrid">Hybride</option>
+  <option value="electric">Électrique</option>
+</select>
+
+        <div class="form-group">
+          <label>Transmission <span class="req">*</span></label>
+          <select class="form-select" id="transmission">
+            <option value="">Sélectionner…</option>
+            <option value="MANUAL">Manuelle</option>
+            <option value="AUTOMATIC">Automatique</option>
+          </select>
+          <div class="field-error" id="err-transmission">La transmission est requise</div>
+        </div>
+
+        <div class="form-group">
+          <label>Kilométrage <span class="req">*</span></label>
+          <div class="price-input-wrap">
+            <input type="number" class="form-input" id="milage" placeholder="Ex: 45000" min="0">
+            <span class="price-suffix">km</span>
+          </div>
+          <div class="field-error" id="err-milage">Le kilométrage est requis</div>
+        </div>
+
+        <div class="form-group">
+          <label>Prix <span class="req">*</span></label>
+          <div class="price-input-wrap">
+            <input type="number" class="form-input" id="price" placeholder="Ex: 3500000" min="0">
+            <span class="price-suffix">DA</span>
+          </div>
+          <div class="field-error" id="err-price">Le prix est requis</div>
+        </div>
+
+        <div class="form-group">
+          <label>Wilaya / Localisation <span class="req">*</span></label>
+          <select class="form-select" id="location">
+            <option value="">Sélectionner…</option>
+            <option>Adrar</option><option>Chlef</option><option>Laghouat</option><option>Oum El Bouaghi</option><option>Batna</option><option>Béjaïa</option><option>Biskra</option><option>Béchar</option><option>Blida</option><option>Bouira</option><option>Tamanrasset</option><option>Tébessa</option><option>Tlemcen</option><option>Tiaret</option><option>Tizi Ouzou</option><option>Alger</option><option>Djelfa</option><option>Jijel</option><option>Sétif</option><option>Saïda</option><option>Skikda</option><option>Sidi Bel Abbès</option><option>Annaba</option><option>Guelma</option><option>Constantine</option><option>Médéa</option><option>Mostaganem</option><option>M'Sila</option><option>Mascara</option><option>Ouargla</option><option>Oran</option><option>El Bayadh</option><option>Illizi</option><option>Bordj Bou Arréridj</option><option>Boumerdès</option><option>El Tarf</option><option>Tindouf</option><option>Tissemsilt</option><option>El Oued</option><option>Khenchela</option><option>Souk Ahras</option><option>Tipaza</option><option>Mila</option><option>Aïn Defla</option><option>Naâma</option><option>Aïn Témouchent</option><option>Ghardaïa</option><option>Relizane</option>
+          </select>
+          <div class="field-error" id="err-location">La wilaya est requise</div>
+        </div>
+
+        <div class="form-group">
+          <label>Couleur</label>
+          <input type="text" class="form-input" id="color" placeholder="Ex: Blanc, Noir, Rouge…">
+        </div>
+
+        <div class="form-group full">
+          <label>Description <span class="req">*</span></label>
+          <textarea class="form-textarea" id="description" placeholder="Décrivez votre véhicule : état général, équipements, historique d'entretien, défauts éventuels…"></textarea>
+          <div class="field-error" id="err-description">La description est requise</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" onclick="goToStep2()"><i class="fas fa-arrow-right"></i> Suivant : Photos</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Photos -->
+  <div id="formStep2" style="display:none;">
+
+    <div class="tip-box">
+      <i class="fas fa-lightbulb"></i>
+      <p>Les annonces avec au moins <strong>3 photos</strong> reçoivent 5× plus de vues. Ajoutez des photos nettes sous une bonne lumière. La première photo sera utilisée comme image principale.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-images"></i> Photos du véhicule</div>
+      <div class="card-sub">Ajoutez jusqu'à 8 photos (JPG, PNG — max 5 Mo chacune)</div>
+
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p><strong>Cliquez</strong> ou glissez vos photos ici</p>
+        <p style="font-size:12px;margin-top:6px;">PNG, JPG — max 5 Mo par fichier</p>
+      </div>
+
+      <div class="images-preview" id="imagesPreview"></div>
+    </div>
+
+    <div class="form-actions-bar">
+      <div class="left">
+        <button class="btn btn-ghost" onclick="goToStep1()"><i class="fas fa-arrow-left"></i> Retour</button>
+      </div>
+      <button class="btn btn-primary" onclick="goToStep3()"><i class="fas fa-arrow-right"></i> Suivant : Contact</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Contact & publication -->
+  <div id="formStep3" style="display:none;">
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-phone"></i> Coordonnées de contact</div>
+      <div class="card-sub">Ces informations seront visibles par les acheteurs intéressés</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Numéro de téléphone <span class="req">*</span></label>
+          <input type="tel" class="form-input" id="phone" placeholder="Ex: 0551 23 45 67">
+          <div class="field-error" id="err-phone">Le numéro de téléphone est requis</div>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp (optionnel)</label>
+          <input type="tel" class="form-input" id="whatsapp" placeholder="Même numéro ou autre">
+        </div>
+      </div>
+    </div>
+
+    <!-- Récap -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-clipboard-check"></i> Récapitulatif</div>
+      <div id="recapContent" style="color:var(--muted);font-size:14px;line-height:1.8;"></div>
+    </div>
+
+    <div class="form-actions-bar">
+      <div class="left">
+        <button class="btn btn-ghost" onclick="goToStep2()"><i class="fas fa-arrow-left"></i> Retour</button>
+      </div>
+      <button class="btn btn-primary" id="publishBtn" onclick="publishAd()">
+        <i class="fas fa-paper-plane"></i> Publier l'annonce
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+const CAR_URL = 'https://api.icaralgerie.com/catalog';
+let uploadedImages = [];
+let primaryIndex = 0;
+
+// ===== AUTH =====
+function getToken() { return localStorage.getItem('access_token'); }
+function getUser()  { return JSON.parse(localStorage.getItem('user') || '{}'); }
+
+// ===== THEME =====
+(function initTheme() {
+  if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+  });
+})();
+
+// ===== GUARD: redirect if not logged in =====
+(function guard() {
+  if(!getToken()) { window.location.href = 'login.html'; return; }
+  const user = getUser();
+  if(user?.number) document.getElementById('phone').value = user.number;
+  loadSubcategories(); // ← ajoute cette ligne
+})();
+
+// ===== STEP NAVIGATION =====
+function goToStep1() {
+  setStep(1);
+  document.getElementById('formStep1').style.display = 'block';
+  document.getElementById('formStep2').style.display = 'none';
+  document.getElementById('formStep3').style.display = 'none';
+}
+function goToStep2() {
+  if(!validateStep1()) return;
+  setStep(2);
+  document.getElementById('formStep1').style.display = 'none';
+  document.getElementById('formStep2').style.display = 'block';
+  document.getElementById('formStep3').style.display = 'none';
+  document.getElementById('step1').classList.add('done');
+}
+function goToStep3() {
+  setStep(3);
+  document.getElementById('formStep1').style.display = 'none';
+  document.getElementById('formStep2').style.display = 'none';
+  document.getElementById('formStep3').style.display = 'block';
+  document.getElementById('step2').classList.add('done');
+  renderRecap();
+}
+async function loadSubcategories() {
+  try {
+    const res = await fetch('https://api.icaralgerie.com/catalog/api/subcategories/', {
+      headers: { 'Authorization': getToken() }
+    });
+    const data = await res.json();
+    const items = data.results || data;
+    const sel = document.getElementById('subcategory');
+    sel.innerHTML = '<option value="">Sélectionner…</option>' +
+      items.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  } catch(e) {
+    // Si l'endpoint n'existe pas, mettre les valeurs connues manuellement
+    console.warn('Subcategories non chargées:', e);
+    document.getElementById('subcategory').innerHTML = `
+      <option value="">Sélectionner…</option>
+      <option value="1">Sedan</option>
+    `;
+  }
+}
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('step'+i);
+    el.classList.remove('active');
+    if(i < n) el.classList.add('done');
+    if(i === n) { el.classList.add('active'); el.classList.remove('done'); }
+  });
+}
+
+// ===== VALIDATION =====
+function validateStep1() {
+ const fields = ['brand','vehicleName','year','subcategory','fuel','transmission','milage','price','location','description'];
+  let valid = true;
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    const err = document.getElementById('err-' + f);
+    if(!el || !el.value.trim()) {
+      el?.classList.add('error'); err?.classList.add('show'); valid = false;
+    } else {
+      el.classList.remove('error'); err?.classList.remove('show');
+    }
+  });
+  if(!valid) showToast('Veuillez remplir tous les champs obligatoires', 'error');
+  return valid;
+}
+
+function validateStep3() {
+  const phone = document.getElementById('phone');
+  const err = document.getElementById('err-phone');
+  if(!phone.value.trim()) { phone.classList.add('error'); err.classList.add('show'); showToast('Le numéro de téléphone est requis', 'error'); return false; }
+  phone.classList.remove('error'); err.classList.remove('show');
+  return true;
+}
+
+function renderRecap() {
+  const brand = document.getElementById('brand').value;
+  const name = document.getElementById('vehicleName').value;
+  const year = document.getElementById('year').value;
+  const subcat = document.getElementById('subcategory');
+  const subcatText = subcat.options[subcat.selectedIndex]?.text || '—'; // ← corrigé
+  const fuel = document.getElementById('fuel').value;
+  const trans = document.getElementById('transmission').value;
+  const milage = document.getElementById('milage').value;
+  const price = document.getElementById('price').value;
+  const loc = document.getElementById('location').value;
+  const desc = document.getElementById('description').value;
+
+  document.getElementById('recapContent').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
+      <div><strong>Marque :</strong> ${brand}</div>
+      <div><strong>Modèle :</strong> ${name}</div>
+      <div><strong>Année :</strong> ${year}</div>
+      <div><strong>Sous-catégorie :</strong> ${subcatText}</div>
+      <div><strong>Carburant :</strong> ${fuel}</div>
+      <div><strong>Transmission :</strong> ${trans === 'AUTOMATIC' ? 'Automatique' : 'Manuelle'}</div>
+      <div><strong>Kilométrage :</strong> ${Number(milage).toLocaleString('fr-DZ')} km</div>
+      <div><strong>Prix :</strong> ${Number(price).toLocaleString('fr-DZ')} DA</div>
+      <div><strong>Localisation :</strong> ${loc}</div>
+      <div><strong>Photos :</strong> ${uploadedImages.length} ajoutée(s)</div>
+    </div>
+    <div style="margin-top:12px;"><strong>Description :</strong><br>
+    <span style="color:var(--text-secondary);">${desc.substring(0,200)}${desc.length>200?'…':''}</span></div>
+  `;
+}
+// ===== IMAGE UPLOAD =====
+function handleFiles(files) {
+  const remaining = 8 - uploadedImages.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(file => {
+    if(file.size > 5 * 1024 * 1024) { showToast(`${file.name} dépasse 5 Mo`, 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      uploadedImages.push({ file, dataUrl: e.target.result });
+      renderPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreviews() {
+  const container = document.getElementById('imagesPreview');
+  container.innerHTML = uploadedImages.map((img, i) => `
+    <div class="img-thumb ${i === primaryIndex ? 'primary-thumb' : ''}" id="thumb-${i}">
+      <img src="${img.dataUrl}" alt="Photo ${i+1}">
+      <button class="img-remove" onclick="removeImage(${i})"><i class="fas fa-times"></i></button>
+      ${i === primaryIndex ? '<div class="primary-badge">Principale</div>' : `<button class="img-set-primary" onclick="setPrimary(${i})">★ Principale</button>`}
+    </div>
+  `).join('');
+}
+
+function removeImage(index) {
+  uploadedImages.splice(index, 1);
+  if(primaryIndex >= uploadedImages.length) primaryIndex = 0;
+  renderPreviews();
+}
+
+function setPrimary(index) {
+  primaryIndex = index;
+  renderPreviews();
+}
+
+// Drag & Drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+async function publishAd() {
+  if(!validateStep3()) return;
+
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Publication…';
+
+  try {
+    const formData = new FormData();
+
+    // Champs texte
+    formData.append('name',             document.getElementById('brand').value.trim());
+    formData.append('brand',            document.getElementById('vehicleName').value.trim());
+    formData.append('year',             document.getElementById('year').value);
+    formData.append('fuel',             document.getElementById('fuel').value);
+    formData.append('transmissionType', document.getElementById('transmission').value);
+    formData.append('milage',           document.getElementById('milage').value);
+    formData.append('price',            document.getElementById('price').value);
+    formData.append('location',         document.getElementById('location').value);
+    formData.append('description',      document.getElementById('description').value.trim());
+    formData.append('phone',            document.getElementById('phone').value.trim());
+    formData.append('coleur',           document.getElementById('color').value.trim() || 'Non précisé');
+    formData.append('subcategory',      document.getElementById('subcategory').value); // ← select à ajouter
+
+    // Images (obligatoire — au moins 1)
+    if(uploadedImages.length === 0) {
+      showToast('Veuillez ajouter au moins une photo', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publier l\'annonce';
+      return;
+    }
+    uploadedImages.forEach((img, i) => {
+      formData.append('images', img.file);
+    });
+
+    const res = await fetch('https://api.icaralgerie.com/catalog/api/vehicules/', {
+      method: 'POST',
+      headers: { 'Authorization': getToken() }, // ⚠️ PAS de Content-Type avec FormData !
+      body: formData
+    });
+
+    if(!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.error('Erreur:', errData);
+      throw new Error(Object.values(errData).flat().join(' · '));
+    }
+
+    showAlert('mainAlert', '✅ Annonce publiée avec succès !', 'success');
+    showToast('Annonce publiée !', 'success');
+    setTimeout(() => { window.location.href = 'profile.html'; }, 2000);
+
+  } catch(e) {
+    showAlert('mainAlert', '❌ ' + e.message, 'error');
+    showToast('Erreur : ' + e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publier l\'annonce';
+  }
+}
+
+async function uploadImages(vehicleId) {
+  for(let i = 0; i < uploadedImages.length; i++) {
+    try {
+      const formData = new FormData();
+      formData.append('image', uploadedImages[i].file);
+      formData.append('vehicule', vehicleId);
+      formData.append('is_primary', i === primaryIndex ? 'true' : 'false');
+      await fetch(`${CAR_URL}/api/vehicules/${vehicleId}/images/`, {
+        method: 'POST',
+        headers: { 'Authorization': getToken() },
+        body: formData
+      });
+    } catch(e) { console.warn('Image upload error:', e); }
+  }
+}
+
+// ===== HELPERS =====
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = `alert ${type} show`;
+  el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg, type='success') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
