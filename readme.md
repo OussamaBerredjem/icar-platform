@@ -3,7 +3,7 @@
 ## Quick Start
 
 ```bash
-git clone <your-repo-url>
+gh repo clone OussamaBerredjem/icar-platform
 cd icar-algerie-backend
 cp .env.example .env
 docker compose up --build -d
