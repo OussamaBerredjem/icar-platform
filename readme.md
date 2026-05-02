@@ -53,7 +53,7 @@ Services communicate asynchronously via RabbitMQ:
 - **Catalog consumer** listens and syncs user data
 - **Notification consumer** listens and sends notifications
 
-  ![rabbit](https://enchere-dz.com/aos/rabbitmq.png)
+ 
 
 This decouples services — no direct HTTP calls between them.
 
